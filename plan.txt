@@ -1,0 +1,16 @@
+1. A basic log-based distributed queue.
+2. No topics
+3. Only partitions
+4. Append only log for storage.
+5. producers are there
+6. consumers are there
+7. no replication of data
+
+
+Start with the Server:
+
+1. Each server has a partition index.
+2. Enqueue - add enqueue message to append only log
+3. Dequeue - add dequeue message to append only log
+4. In-memory michael-scott queue
+5. On file log
