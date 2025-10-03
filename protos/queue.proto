@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package queue;
+
+option go_package = "franz/compiled_protos";
+
+
+message DataEntry {
+    string key = 1;
+    bytes value = 2;
+    int64 timestamp = 3;
+    int64 offset = 4;
+}
