@@ -6,6 +6,7 @@ type Node struct {
 	Key         string
 	Next        *Node
 	FileOffset  int64
+	DataSize    int64
 	QueueOffset int64
 	Timestamp   int64
 }
