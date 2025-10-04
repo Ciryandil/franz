@@ -98,7 +98,7 @@ const file_queue_proto_rawDesc = "" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\fR\x05value\x12\x1c\n" +
 	"\ttimestamp\x18\x03 \x01(\x03R\ttimestamp\x12\x16\n" +
-	"\x06offset\x18\x04 \x01(\x03R\x06offsetB\x17Z\x15franz/compiled_protosb\x06proto3"
+	"\x06offset\x18\x04 \x01(\x03R\x06offsetB\x1eZ\x1cfranz-server/compiled_protosb\x06proto3"
 
 var (
 	file_queue_proto_rawDescOnce sync.Once
