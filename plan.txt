@@ -14,3 +14,7 @@ Start with the Server:
 3. Dequeue - add dequeue message to append only log
 4. In-memory michael-scott queue
 5. On file log
+
+Eventual goal:
+
+Implement zero copy like Kafka.

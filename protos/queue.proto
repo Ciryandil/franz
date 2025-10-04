@@ -1,0 +1,34 @@
+syntax = "proto3";
+
+package queue;
+
+option go_package = "./compiled_protos";
+
+
+message DataEntry {
+    string key = 1;
+    bytes value = 2;
+    int64 timestamp = 3;
+    int64 offset = 4;
+}
+
+message DataEntryArray {
+    repeated DataEntry entries = 1;
+}
+
+message EnqueueResponse {
+    bool success = 1;
+    string error = 2;
+}
+
+message DequeueRequest {
+    int64 offset = 1;
+    int64 num_entries = 2;
+}
+
+
+
+service QueueService {
+    rpc Enqueue (DataEntryArray) returns (EnqueueResponse);
+    rpc Dequeue (DequeueRequest) returns (DataEntryArray);
+}

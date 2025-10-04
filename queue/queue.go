@@ -1,6 +1,6 @@
 package queue
 
-import "github.com/Ciryandil/franz/custom_errors"
+import "franz/custom_errors"
 
 type Node struct {
 	Key         string
