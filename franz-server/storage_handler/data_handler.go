@@ -2,8 +2,8 @@ package storage_handler
 
 import (
 	"encoding/binary"
-	"fmt"
 	"franz/franz-server/constants"
+	"io"
 	"log"
 	"os"
 
@@ -58,38 +58,28 @@ func WriteEntriesToFile(dataEntries []*compiled_protos.DataEntry) ([]uint64, err
 	return offsets, nil
 }
 
-func ReadEntriesFromFile(offset int64, numEntries int64) (*compiled_protos.DataEntryArray, error) {
-	var entriesRead int64 = 0
-	entries := make([]*compiled_protos.DataEntry, numEntries)
-	for entriesRead < numEntries {
-		dataBuf := make([]byte, 64*1024)
-		n, err := DataLogFileRead.ReadAt(dataBuf, offset)
+func ReadEntriesFromFile(offset int64, numBytes int64) (*compiled_protos.DataEntryArray, error) {
+	entries := make([]*compiled_protos.DataEntry, 0)
+	DataLogFileRead.Seek(offset, 0)
+	lenBuf := make([]byte, numBytes)
+	_, err := io.ReadFull(DataLogFileRead, lenBuf)
+	if err != nil {
+		return nil, err
+	}
+	var pos int64 = 0
+	for pos < numBytes {
+		entrySize := binary.BigEndian.Uint64(lenBuf[pos : pos+8])
+		pos += 8
+		var dataEntry *compiled_protos.DataEntry
+		err = proto.Unmarshal(lenBuf[pos:pos+int64(entrySize)], dataEntry)
 		if err != nil {
 			return nil, err
 		}
+		entries = append(entries, dataEntry)
+		pos += int64(entrySize)
 	}
 
-	lenBuf := make([]byte, 8)
-	n, err := DataLogFileRead.ReadAt(lenBuf, offset)
-	if err != nil {
-		return nil, err
-	}
-	if n != 8 {
-		return nil, fmt.Errorf("insufficient bytes read")
-	}
-	entryLength := binary.BigEndian.Uint64(lenBuf)
-	dataBuf := make([]byte, entryLength)
-	n, err = DataLogFileRead.ReadAt(dataBuf, offset+8)
-	if err != nil {
-		return nil, err
-	}
-	if n != int(entryLength) {
-		return nil, fmt.Errorf("insufficient bytes read")
-	}
-	var dataEntry *compiled_protos.DataEntry
-	err = proto.Unmarshal(dataBuf, dataEntry)
-	if err != nil {
-		return nil, err
-	}
-	return dataEntry, nil
+	return &compiled_protos.DataEntryArray{
+		Entries: entries,
+	}, nil
 }
