@@ -41,3 +41,17 @@ func (q *QueueHandler) Dequeue(ctx context.Context, dequeueRequest *compiled_pro
 	}
 	return resp, nil
 }
+
+func (q *QueueHandler) GetOffset(ctx context.Context, getOffsetRequest *compiled_protos.GetOffsetRequest) (*compiled_protos.GetOffsetResponse, error) {
+	offset := storage_handler.ConsumerOffsetHandler.GetConsumerOffset(getOffsetRequest.GetConsumer())
+	return &compiled_protos.GetOffsetResponse{
+		Offset: offset,
+	}, nil
+}
+
+func (q *QueueHandler) SetOffset(ctx context.Context, setOffsetRequest *compiled_protos.SetOffsetRequest) (*compiled_protos.SetOffsetResponse, error) {
+	storage_handler.ConsumerOffsetHandler.SetConsumerOffset(setOffsetRequest.GetConsumer(), setOffsetRequest.GetOffset())
+	return &compiled_protos.SetOffsetResponse{
+		Success: true,
+	}, nil
+}

@@ -136,7 +136,6 @@ func (x *DataEntryArray) GetEntries() []*DataEntry {
 type EnqueueResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
-	Error         string                 `protobuf:"bytes,2,opt,name=error,proto3" json:"error,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -176,13 +175,6 @@ func (x *EnqueueResponse) GetSuccess() bool {
 		return x.Success
 	}
 	return false
-}
-
-func (x *EnqueueResponse) GetError() string {
-	if x != nil {
-		return x.Error
-	}
-	return ""
 }
 
 type DequeueRequest struct {
@@ -237,6 +229,190 @@ func (x *DequeueRequest) GetNumEntries() int64 {
 	return 0
 }
 
+type GetOffsetRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Consumer      string                 `protobuf:"bytes,1,opt,name=consumer,proto3" json:"consumer,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetOffsetRequest) Reset() {
+	*x = GetOffsetRequest{}
+	mi := &file_queue_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetOffsetRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetOffsetRequest) ProtoMessage() {}
+
+func (x *GetOffsetRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_queue_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetOffsetRequest.ProtoReflect.Descriptor instead.
+func (*GetOffsetRequest) Descriptor() ([]byte, []int) {
+	return file_queue_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *GetOffsetRequest) GetConsumer() string {
+	if x != nil {
+		return x.Consumer
+	}
+	return ""
+}
+
+type GetOffsetResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Offset        int64                  `protobuf:"varint,1,opt,name=offset,proto3" json:"offset,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetOffsetResponse) Reset() {
+	*x = GetOffsetResponse{}
+	mi := &file_queue_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetOffsetResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetOffsetResponse) ProtoMessage() {}
+
+func (x *GetOffsetResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_queue_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetOffsetResponse.ProtoReflect.Descriptor instead.
+func (*GetOffsetResponse) Descriptor() ([]byte, []int) {
+	return file_queue_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *GetOffsetResponse) GetOffset() int64 {
+	if x != nil {
+		return x.Offset
+	}
+	return 0
+}
+
+type SetOffsetRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Consumer      string                 `protobuf:"bytes,1,opt,name=consumer,proto3" json:"consumer,omitempty"`
+	Offset        int64                  `protobuf:"varint,2,opt,name=offset,proto3" json:"offset,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SetOffsetRequest) Reset() {
+	*x = SetOffsetRequest{}
+	mi := &file_queue_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SetOffsetRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SetOffsetRequest) ProtoMessage() {}
+
+func (x *SetOffsetRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_queue_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SetOffsetRequest.ProtoReflect.Descriptor instead.
+func (*SetOffsetRequest) Descriptor() ([]byte, []int) {
+	return file_queue_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *SetOffsetRequest) GetConsumer() string {
+	if x != nil {
+		return x.Consumer
+	}
+	return ""
+}
+
+func (x *SetOffsetRequest) GetOffset() int64 {
+	if x != nil {
+		return x.Offset
+	}
+	return 0
+}
+
+type SetOffsetResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SetOffsetResponse) Reset() {
+	*x = SetOffsetResponse{}
+	mi := &file_queue_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SetOffsetResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SetOffsetResponse) ProtoMessage() {}
+
+func (x *SetOffsetResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_queue_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SetOffsetResponse.ProtoReflect.Descriptor instead.
+func (*SetOffsetResponse) Descriptor() ([]byte, []int) {
+	return file_queue_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *SetOffsetResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
 var File_queue_proto protoreflect.FileDescriptor
 
 const file_queue_proto_rawDesc = "" +
@@ -248,17 +424,27 @@ const file_queue_proto_rawDesc = "" +
 	"\ttimestamp\x18\x03 \x01(\x03R\ttimestamp\x12\x16\n" +
 	"\x06offset\x18\x04 \x01(\x03R\x06offset\"<\n" +
 	"\x0eDataEntryArray\x12*\n" +
-	"\aentries\x18\x01 \x03(\v2\x10.queue.DataEntryR\aentries\"A\n" +
+	"\aentries\x18\x01 \x03(\v2\x10.queue.DataEntryR\aentries\"+\n" +
 	"\x0fEnqueueResponse\x12\x18\n" +
-	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x14\n" +
-	"\x05error\x18\x02 \x01(\tR\x05error\"I\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\"I\n" +
 	"\x0eDequeueRequest\x12\x16\n" +
 	"\x06offset\x18\x01 \x01(\x03R\x06offset\x12\x1f\n" +
 	"\vnum_entries\x18\x02 \x01(\x03R\n" +
-	"numEntries2\x81\x01\n" +
+	"numEntries\".\n" +
+	"\x10GetOffsetRequest\x12\x1a\n" +
+	"\bconsumer\x18\x01 \x01(\tR\bconsumer\"+\n" +
+	"\x11GetOffsetResponse\x12\x16\n" +
+	"\x06offset\x18\x01 \x01(\x03R\x06offset\"F\n" +
+	"\x10SetOffsetRequest\x12\x1a\n" +
+	"\bconsumer\x18\x01 \x01(\tR\bconsumer\x12\x16\n" +
+	"\x06offset\x18\x02 \x01(\x03R\x06offset\"-\n" +
+	"\x11SetOffsetResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess2\x81\x02\n" +
 	"\fQueueService\x128\n" +
 	"\aEnqueue\x12\x15.queue.DataEntryArray\x1a\x16.queue.EnqueueResponse\x127\n" +
-	"\aDequeue\x12\x15.queue.DequeueRequest\x1a\x15.queue.DataEntryArrayB\x13Z\x11./compiled_protosb\x06proto3"
+	"\aDequeue\x12\x15.queue.DequeueRequest\x1a\x15.queue.DataEntryArray\x12>\n" +
+	"\tGetOffset\x12\x17.queue.GetOffsetRequest\x1a\x18.queue.GetOffsetResponse\x12>\n" +
+	"\tSetOffset\x12\x17.queue.SetOffsetRequest\x1a\x18.queue.SetOffsetResponseB\x13Z\x11./compiled_protosb\x06proto3"
 
 var (
 	file_queue_proto_rawDescOnce sync.Once
@@ -272,21 +458,29 @@ func file_queue_proto_rawDescGZIP() []byte {
 	return file_queue_proto_rawDescData
 }
 
-var file_queue_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
+var file_queue_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
 var file_queue_proto_goTypes = []any{
-	(*DataEntry)(nil),       // 0: queue.DataEntry
-	(*DataEntryArray)(nil),  // 1: queue.DataEntryArray
-	(*EnqueueResponse)(nil), // 2: queue.EnqueueResponse
-	(*DequeueRequest)(nil),  // 3: queue.DequeueRequest
+	(*DataEntry)(nil),         // 0: queue.DataEntry
+	(*DataEntryArray)(nil),    // 1: queue.DataEntryArray
+	(*EnqueueResponse)(nil),   // 2: queue.EnqueueResponse
+	(*DequeueRequest)(nil),    // 3: queue.DequeueRequest
+	(*GetOffsetRequest)(nil),  // 4: queue.GetOffsetRequest
+	(*GetOffsetResponse)(nil), // 5: queue.GetOffsetResponse
+	(*SetOffsetRequest)(nil),  // 6: queue.SetOffsetRequest
+	(*SetOffsetResponse)(nil), // 7: queue.SetOffsetResponse
 }
 var file_queue_proto_depIdxs = []int32{
 	0, // 0: queue.DataEntryArray.entries:type_name -> queue.DataEntry
 	1, // 1: queue.QueueService.Enqueue:input_type -> queue.DataEntryArray
 	3, // 2: queue.QueueService.Dequeue:input_type -> queue.DequeueRequest
-	2, // 3: queue.QueueService.Enqueue:output_type -> queue.EnqueueResponse
-	1, // 4: queue.QueueService.Dequeue:output_type -> queue.DataEntryArray
-	3, // [3:5] is the sub-list for method output_type
-	1, // [1:3] is the sub-list for method input_type
+	4, // 3: queue.QueueService.GetOffset:input_type -> queue.GetOffsetRequest
+	6, // 4: queue.QueueService.SetOffset:input_type -> queue.SetOffsetRequest
+	2, // 5: queue.QueueService.Enqueue:output_type -> queue.EnqueueResponse
+	1, // 6: queue.QueueService.Dequeue:output_type -> queue.DataEntryArray
+	5, // 7: queue.QueueService.GetOffset:output_type -> queue.GetOffsetResponse
+	7, // 8: queue.QueueService.SetOffset:output_type -> queue.SetOffsetResponse
+	5, // [5:9] is the sub-list for method output_type
+	1, // [1:5] is the sub-list for method input_type
 	1, // [1:1] is the sub-list for extension type_name
 	1, // [1:1] is the sub-list for extension extendee
 	0, // [0:1] is the sub-list for field type_name
@@ -303,7 +497,7 @@ func file_queue_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_queue_proto_rawDesc), len(file_queue_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   4,
+			NumMessages:   8,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

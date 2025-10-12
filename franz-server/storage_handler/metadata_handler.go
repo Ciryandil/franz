@@ -11,7 +11,7 @@ import (
 var MetadataLogFileWrite *os.File
 var MetadataLogFileRead *os.File
 
-func init() {
+func NewMetadataHandler() {
 	var err error
 	MetadataLogFileWrite, err = os.OpenFile(constants.METADATA_FILE, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {

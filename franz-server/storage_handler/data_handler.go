@@ -16,7 +16,7 @@ var DataLogFileWrite *os.File
 var DataLogFileRead *os.File
 var DataFileOffset uint64
 
-func init() {
+func NewDataHandler() {
 	var err error
 	DataLogFileWrite, err = os.OpenFile(constants.QUEUE_FILE, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {

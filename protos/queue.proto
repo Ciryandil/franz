@@ -18,7 +18,6 @@ message DataEntryArray {
 
 message EnqueueResponse {
     bool success = 1;
-    string error = 2;
 }
 
 message DequeueRequest {
@@ -26,9 +25,26 @@ message DequeueRequest {
     int64 num_entries = 2;
 }
 
+message GetOffsetRequest {
+    string consumer = 1;
+}
 
+message GetOffsetResponse {
+    int64 offset = 1;
+}
+
+message SetOffsetRequest {
+    string consumer = 1;
+    int64 offset = 2;
+}
+
+message SetOffsetResponse {
+    bool success = 1;
+}
 
 service QueueService {
     rpc Enqueue (DataEntryArray) returns (EnqueueResponse);
     rpc Dequeue (DequeueRequest) returns (DataEntryArray);
+    rpc GetOffset(GetOffsetRequest) returns (GetOffsetResponse);
+    rpc SetOffset(SetOffsetRequest) returns (SetOffsetResponse);
 }

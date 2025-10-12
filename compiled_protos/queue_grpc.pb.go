@@ -19,8 +19,10 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	QueueService_Enqueue_FullMethodName = "/queue.QueueService/Enqueue"
-	QueueService_Dequeue_FullMethodName = "/queue.QueueService/Dequeue"
+	QueueService_Enqueue_FullMethodName   = "/queue.QueueService/Enqueue"
+	QueueService_Dequeue_FullMethodName   = "/queue.QueueService/Dequeue"
+	QueueService_GetOffset_FullMethodName = "/queue.QueueService/GetOffset"
+	QueueService_SetOffset_FullMethodName = "/queue.QueueService/SetOffset"
 )
 
 // QueueServiceClient is the client API for QueueService service.
@@ -29,6 +31,8 @@ const (
 type QueueServiceClient interface {
 	Enqueue(ctx context.Context, in *DataEntryArray, opts ...grpc.CallOption) (*EnqueueResponse, error)
 	Dequeue(ctx context.Context, in *DequeueRequest, opts ...grpc.CallOption) (*DataEntryArray, error)
+	GetOffset(ctx context.Context, in *GetOffsetRequest, opts ...grpc.CallOption) (*GetOffsetResponse, error)
+	SetOffset(ctx context.Context, in *SetOffsetRequest, opts ...grpc.CallOption) (*SetOffsetResponse, error)
 }
 
 type queueServiceClient struct {
@@ -59,12 +63,34 @@ func (c *queueServiceClient) Dequeue(ctx context.Context, in *DequeueRequest, op
 	return out, nil
 }
 
+func (c *queueServiceClient) GetOffset(ctx context.Context, in *GetOffsetRequest, opts ...grpc.CallOption) (*GetOffsetResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetOffsetResponse)
+	err := c.cc.Invoke(ctx, QueueService_GetOffset_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *queueServiceClient) SetOffset(ctx context.Context, in *SetOffsetRequest, opts ...grpc.CallOption) (*SetOffsetResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(SetOffsetResponse)
+	err := c.cc.Invoke(ctx, QueueService_SetOffset_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // QueueServiceServer is the server API for QueueService service.
 // All implementations must embed UnimplementedQueueServiceServer
 // for forward compatibility.
 type QueueServiceServer interface {
 	Enqueue(context.Context, *DataEntryArray) (*EnqueueResponse, error)
 	Dequeue(context.Context, *DequeueRequest) (*DataEntryArray, error)
+	GetOffset(context.Context, *GetOffsetRequest) (*GetOffsetResponse, error)
+	SetOffset(context.Context, *SetOffsetRequest) (*SetOffsetResponse, error)
 	mustEmbedUnimplementedQueueServiceServer()
 }
 
@@ -80,6 +106,12 @@ func (UnimplementedQueueServiceServer) Enqueue(context.Context, *DataEntryArray)
 }
 func (UnimplementedQueueServiceServer) Dequeue(context.Context, *DequeueRequest) (*DataEntryArray, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Dequeue not implemented")
+}
+func (UnimplementedQueueServiceServer) GetOffset(context.Context, *GetOffsetRequest) (*GetOffsetResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetOffset not implemented")
+}
+func (UnimplementedQueueServiceServer) SetOffset(context.Context, *SetOffsetRequest) (*SetOffsetResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SetOffset not implemented")
 }
 func (UnimplementedQueueServiceServer) mustEmbedUnimplementedQueueServiceServer() {}
 func (UnimplementedQueueServiceServer) testEmbeddedByValue()                      {}
@@ -138,6 +170,42 @@ func _QueueService_Dequeue_Handler(srv interface{}, ctx context.Context, dec fun
 	return interceptor(ctx, in, info, handler)
 }
 
+func _QueueService_GetOffset_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetOffsetRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(QueueServiceServer).GetOffset(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: QueueService_GetOffset_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(QueueServiceServer).GetOffset(ctx, req.(*GetOffsetRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _QueueService_SetOffset_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SetOffsetRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(QueueServiceServer).SetOffset(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: QueueService_SetOffset_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(QueueServiceServer).SetOffset(ctx, req.(*SetOffsetRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // QueueService_ServiceDesc is the grpc.ServiceDesc for QueueService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -152,6 +220,14 @@ var QueueService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Dequeue",
 			Handler:    _QueueService_Dequeue_Handler,
+		},
+		{
+			MethodName: "GetOffset",
+			Handler:    _QueueService_GetOffset_Handler,
+		},
+		{
+			MethodName: "SetOffset",
+			Handler:    _QueueService_SetOffset_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
