@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"franz/compiled_protos"
+	"franz/franz-client/utils"
 	"hash/fnv"
 	"sync"
 	"sync/atomic"
@@ -11,13 +12,11 @@ import (
 
 	"github.com/google/uuid"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
-	"google.golang.org/grpc/health/grpc_health_v1"
 )
 
 type ProducerConfig struct {
 	PartitionAddrs []string
-	FlushFrequency uint16
+	FlushInterval  uint16
 	BatchSize      uint8
 }
 
@@ -26,30 +25,9 @@ type Producer struct {
 	buffer     chan *compiled_protos.DataEntry
 	ctx        context.Context
 	cancel     context.CancelFunc
-	bufferSize uint32
+	bufferSize int32
 	clients    []*compiled_protos.QueueServiceClient
 	conns      []*grpc.ClientConn
-}
-
-func probePartitionServer(addr string) *grpc.ClientConn {
-	conn, err := grpc.NewClient(addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
-	if err != nil {
-		fmt.Printf("[FRANZ] Error connecting to %s: %v\n", addr, err)
-		return nil
-	}
-	client := grpc_health_v1.NewHealthClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-	resp, err := client.Check(ctx, &grpc_health_v1.HealthCheckRequest{})
-	if err != nil {
-		fmt.Printf("[FRANZ] Error connecting to %s: %v\n", addr, err)
-		return nil
-	}
-	if resp.Status != grpc_health_v1.HealthCheckResponse_SERVING {
-		fmt.Printf("[FRANZ] Error connecting to %s: server not serving\n", addr)
-		return nil
-	}
-	return conn
 }
 
 func NewProducer(config ProducerConfig) (*Producer, error) {
@@ -57,12 +35,18 @@ func NewProducer(config ProducerConfig) (*Producer, error) {
 	if len(addrs) == 0 {
 		return nil, fmt.Errorf("no partition addresses provided")
 	}
+	if config.BatchSize == 0 {
+		config.BatchSize = 1
+	}
+	if config.FlushInterval == 0 {
+		config.FlushInterval = 10
+	}
 	wg := sync.WaitGroup{}
 	connChan := make(chan *grpc.ClientConn, len(addrs))
 	for _, addr := range addrs {
 		wg.Add(1)
 		go func(addr string) {
-			conn := probePartitionServer(addr)
+			conn := utils.ProbePartitionServer(addr)
 			if conn != nil {
 				connChan <- conn
 			}
@@ -84,7 +68,7 @@ func NewProducer(config ProducerConfig) (*Producer, error) {
 	ctx, cancel := context.WithCancel(context.Background())
 	producer := Producer{
 		Config:  config,
-		buffer:  make(chan *compiled_protos.DataEntry, config.BatchSize),
+		buffer:  make(chan *compiled_protos.DataEntry, 2*config.BatchSize),
 		ctx:     ctx,
 		cancel:  cancel,
 		clients: reachableClients,
@@ -97,7 +81,7 @@ func NewProducer(config ProducerConfig) (*Producer, error) {
 
 func (producer *Producer) StartFlushLoop() {
 	go func() {
-		ticker := time.NewTicker(time.Duration(producer.Config.FlushFrequency) * time.Second)
+		ticker := time.NewTicker(time.Duration(producer.Config.FlushInterval) * time.Second)
 		defer ticker.Stop()
 		for {
 			select {
@@ -111,9 +95,14 @@ func (producer *Producer) StartFlushLoop() {
 }
 
 func (producer *Producer) Produce(data *compiled_protos.DataEntry) {
-	producer.buffer <- data
-	newSize := atomic.AddUint32(&producer.bufferSize, 1)
-	if newSize == uint32(producer.Config.BatchSize) {
+	select {
+	case <-producer.ctx.Done():
+		return
+	default:
+		producer.buffer <- data
+	}
+	newSize := atomic.AddInt32(&producer.bufferSize, 1)
+	if newSize == int32(producer.Config.BatchSize) {
 		producer.Flush()
 	}
 }
@@ -122,10 +111,34 @@ func (producer *Producer) Flush() {
 	currBufferSize := producer.bufferSize
 	dataMap := make([][]*compiled_protos.DataEntry, len(producer.clients))
 	for range currBufferSize {
-		entry := <-producer.buffer
+		entry, _ := <-producer.buffer
+		if entry == nil {
+			break
+		}
 		index := producer.findPartition(entry.Key)
 		dataMap[index] = append(dataMap[index], entry)
 	}
+	atomic.AddInt32(&producer.bufferSize, -currBufferSize)
+	wg := sync.WaitGroup{}
+	wg.Add(len(dataMap))
+	for itr, dataEntries := range dataMap {
+		dataEntryArray := &compiled_protos.DataEntryArray{
+			Entries: dataEntries,
+		}
+		go producer.push(producer.clients[itr], dataEntryArray, &wg)
+	}
+	wg.Wait()
+}
+
+func (producer *Producer) FlushAll() {
+	count := int32(0)
+	dataMap := make([][]*compiled_protos.DataEntry, len(producer.clients))
+	for entry := range producer.buffer {
+		count += 1
+		index := producer.findPartition(entry.Key)
+		dataMap[index] = append(dataMap[index], entry)
+	}
+	atomic.AddInt32(&producer.bufferSize, -count)
 	wg := sync.WaitGroup{}
 	wg.Add(len(dataMap))
 	for itr, dataEntries := range dataMap {
@@ -141,14 +154,14 @@ func (producer *Producer) findPartition(key string) uint8 {
 	if key == "" {
 		key = uuid.New().String()
 	}
-	hash := hashStringToUint32(key)
-	return uint8(hash % uint32(len(producer.Config.PartitionAddrs)))
+	hash := hashStringToInt32(key)
+	return uint8(hash % int32(len(producer.Config.PartitionAddrs)))
 }
 
-func hashStringToUint32(s string) uint32 {
+func hashStringToInt32(s string) int32 {
 	h := fnv.New32a()
 	h.Write([]byte(s))
-	return h.Sum32()
+	return int32(h.Sum32())
 }
 
 func (producer *Producer) push(clientPtr *compiled_protos.QueueServiceClient, entries *compiled_protos.DataEntryArray, wg *sync.WaitGroup) {
@@ -168,6 +181,8 @@ func (producer *Producer) push(clientPtr *compiled_protos.QueueServiceClient, en
 
 func (producer *Producer) Close() {
 	producer.cancel()
+	close(producer.buffer)
+	producer.FlushAll()
 	for _, conn := range producer.conns {
 		conn.Close()
 	}
