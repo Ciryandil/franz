@@ -4,6 +4,7 @@ import (
 	"encoding/binary"
 	"fmt"
 	"franz/franz-server/constants"
+	"io"
 	"log"
 	"os"
 )
@@ -39,11 +40,11 @@ func ReadOffsetsFromFile(numOffsets uint64, startOffset int64) ([]uint64, error)
 	buf := make([]byte, 8*numOffsets)
 	fmt.Printf("[FRANZ] Trying to read %d bytes from offsets file\n", len(buf))
 	n, err := MetadataLogFileRead.ReadAt(buf, startOffset)
-	if err != nil {
+	if err != nil && err != io.EOF {
 		return nil, err
 	}
 	if n != len(buf) {
-		return nil, fmt.Errorf("insufficient bytes read")
+		buf = buf[:n]
 	}
 	offsets := make([]uint64, numOffsets)
 	for itr, _ := range offsets {
