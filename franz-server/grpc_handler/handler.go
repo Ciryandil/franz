@@ -8,7 +8,7 @@ import (
 )
 
 type QueueHandler struct {
-	*compiled_protos.UnimplementedQueueServiceServer
+	compiled_protos.UnimplementedQueueServiceServer
 	EnqueueLock sync.Mutex
 	DequeueLock sync.Mutex
 }

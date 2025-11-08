@@ -24,6 +24,7 @@ func NewMetadataHandler() {
 }
 
 func WriteOffsetsToFile(offsets []uint64) error {
+	fmt.Printf("[FRANZ] Writing %d offsets to file: %v\n", len(offsets), offsets)
 	byteBuf := make([]byte, len(offsets)*8)
 	for ind, offset := range offsets {
 		byteOffset := make([]byte, 8)
@@ -36,6 +37,7 @@ func WriteOffsetsToFile(offsets []uint64) error {
 
 func ReadOffsetsFromFile(numOffsets uint64, startOffset int64) ([]uint64, error) {
 	buf := make([]byte, 8*numOffsets)
+	fmt.Printf("[FRANZ] Trying to read %d bytes from offsets file\n", len(buf))
 	n, err := MetadataLogFileRead.ReadAt(buf, startOffset)
 	if err != nil {
 		return nil, err
@@ -48,5 +50,7 @@ func ReadOffsetsFromFile(numOffsets uint64, startOffset int64) ([]uint64, error)
 		offset := binary.BigEndian.Uint64(buf[itr*8 : (itr+1)*8])
 		offsets[itr] = offset
 	}
+	fmt.Printf("[FRANZ] Read %d offsets from file: %v\n", len(offsets), offsets)
+
 	return offsets, nil
 }

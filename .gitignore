@@ -22,3 +22,7 @@ vendor/
 # OS-specific files
 .DS_Store
 Thumbs.db
+.env
+metadata_file_*
+queue_file_*
+consumer_metadata_file_*

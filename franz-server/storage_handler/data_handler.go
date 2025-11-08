@@ -2,6 +2,7 @@ package storage_handler
 
 import (
 	"encoding/binary"
+	"fmt"
 	"franz/franz-server/constants"
 	"io"
 	"log"
@@ -30,6 +31,7 @@ func NewDataHandler() {
 	if err != nil {
 		log.Fatalf("[FRANZ] Unable to load Data Log File Stats: %v\n", err)
 	}
+	fmt.Println("[FRANZ] Data file size on load: ", info.Size())
 	DataFileOffset = uint64(info.Size())
 
 }
@@ -50,6 +52,7 @@ func WriteEntriesToFile(dataEntries []*compiled_protos.DataEntry) ([]uint64, err
 		offsets[itr] = sizeSum + DataFileOffset
 		sizeSum += uint64(len(serializedEntry)) + 8
 	}
+	fmt.Printf("[FRANZ] Writing out entry: %v of length %d\n", byteArray, len(byteArray))
 	_, err := DataLogFileWrite.Write(byteArray)
 	if err != nil {
 		return nil, err
@@ -66,11 +69,14 @@ func ReadEntriesFromFile(offset int64, numBytes int64) (*compiled_protos.DataEnt
 	if err != nil {
 		return nil, err
 	}
+	fmt.Printf("Buffer read from file: %v\n", lenBuf)
 	var pos int64 = 0
 	for pos < numBytes {
 		entrySize := binary.BigEndian.Uint64(lenBuf[pos : pos+8])
+		fmt.Printf("Entry size found: %d\n", entrySize)
 		pos += 8
 		var dataEntry *compiled_protos.DataEntry
+		fmt.Printf("Trying to unmarshal: %v\n", lenBuf[pos:pos+int64(entrySize)])
 		err = proto.Unmarshal(lenBuf[pos:pos+int64(entrySize)], dataEntry)
 		if err != nil {
 			return nil, err

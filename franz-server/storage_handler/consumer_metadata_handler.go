@@ -19,6 +19,9 @@ var ConsumerOffsetHandler ConsumerMetadataHandler
 func NewConsumerMetadataHandler() {
 	file, err := os.Open(constants.CONSUMER_METADATA_FILE)
 	if err != nil {
+		if os.IsNotExist(err) {
+			return
+		}
 		log.Fatalf("[FRANZ] Error opening Consumer offset file: %v\n", err)
 	}
 	defer file.Close()
@@ -34,6 +37,7 @@ func NewConsumerMetadataHandler() {
 
 func (c *ConsumerMetadataHandler) GetConsumerOffset(consumer string) int64 {
 	c.lock.RLock()
+	defer c.lock.RUnlock()
 	val, ok := c.offsetMap.Load(consumer)
 	if !ok {
 		return 0
@@ -44,6 +48,7 @@ func (c *ConsumerMetadataHandler) GetConsumerOffset(consumer string) int64 {
 
 func (c *ConsumerMetadataHandler) SetConsumerOffset(consumer string, offset int64) {
 	c.lock.RLock()
+	defer c.lock.RUnlock()
 	c.offsetMap.Store(consumer, offset)
 }
 
